@@ -1,0 +1,44 @@
+- name: Verify
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+  - name: check that sshd config exists
+    stat:
+      path: /etc/ssh/sshd_config
+    register: config_check
+
+  - name: assert that sshd config exists
+    assert:
+      that: config_check.stat.exists
+
+  - name: check that hostkeys exist
+    stat:
+      path: "{{ item }}"
+    register: key_check
+    loop:
+      - "/etc/ssh/ssh_host_rsa_key"
+      - "/etc/ssh/ssh_host_ecdsa_key"
+      - "/etc/ssh/ssh_host_ed25519_key"
+
+  - name: assert that hostkeys exist
+    assert:
+      that: item.stat.exists
+      quiet: true
+    loop: "{{ key_check.results }}"
+    loop_control:
+      label: "{{ item.item }}"
+
+  - name: read sshd config
+    command: cat /etc/ssh/sshd_config
+    register: config
+
+  - name: assert that password auth is disabled
+    assert:
+      that: >-
+        "PasswordAuthentication no" in config.stdout_lines
+
+  - name: assert that passwordless root login is enabled
+    assert:
+      that: >-
+        "PermitRootLogin without-password" in config.stdout_lines

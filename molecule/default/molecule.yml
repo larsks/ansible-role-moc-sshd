@@ -1,0 +1,26 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: instance
+    image: "${MOLECULE_IMAGE:-centos:7}"
+    pre_build_image: true
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      interpreter_python: auto_silent
+      callback_whitelist: profile_tasks, timer, yaml
+    ssh_connection:
+      pipelining: false
+  inventory:
+    group_vars:
+      all:
+        ansible_user: mocops
+verifier:
+  name: ansible
+lint: |
+  set -e
+  yamllint .

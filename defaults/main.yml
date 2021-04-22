@@ -1,0 +1,18 @@
+ssh_server_package: openssh-server
+ssh_config_dir: /etc/ssh
+ssh_config_path: "{{ ssh_config_dir }}/ssh_config"
+ssh_port: 22
+ssh_listen_address:
+  - "0.0.0.0"
+  - "::"
+
+ssh_hostkeys:
+  - type: rsa
+    path: "{{ ssh_config_dir }}/ssh_host_rsa_key"
+  - type: ecdsa
+    path: "{{ ssh_config_dir }}/ssh_host_ecdsa_key"
+  - type: ed25519
+    path: "{{ ssh_config_dir }}/ssh_host_ed25519_key"
+
+sshd_path: /usr/sbin/sshd
+sshd_config_path: "{{ ssh_config_dir }}/sshd_config"

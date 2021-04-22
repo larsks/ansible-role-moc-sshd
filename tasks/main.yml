@@ -1,0 +1,36 @@
+- name: install ssh
+  tags: [package]
+  become: true
+  package:
+    name: "{{ ssh_server_package }}"
+    state: installed
+
+- name: generate ssh hostkeys
+  tags: [config]
+  become: true
+  command: >-
+    ssh-keygen -t {{ item.type }} -N "" -f {{ item.path }}
+    {{ item.args|default("") }}
+  args:
+    creates: "{{ item.path }}"
+  loop: "{{ ssh_hostkeys }}"
+
+- name: install ssh configuration
+  tags: [config]
+  become: true
+  template:
+    src: sshd_config.j2
+    dest: "{{ sshd_config_path }}"
+    owner: "root"
+    group: "root"
+    mode: "0600"
+  notify:
+    - restart sshd
+
+- name: activate sshd
+  tags: [notest,service]
+  become: true
+  service:
+    name: sshd
+    state: started
+    enabled: true

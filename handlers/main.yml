@@ -1,0 +1,12 @@
+- name: check sshd config
+  become: true
+  command: sshd -t
+  listen: "restart sshd"
+
+- name: restart sshd service
+  become: true
+  when: not molecule_yml is defined
+  service:
+    name: sshd
+    state: restarted
+  listen: "restart sshd"
